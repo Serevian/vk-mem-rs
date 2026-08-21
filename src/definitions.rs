@@ -1,6 +1,7 @@
 use crate::ffi::{self};
 use ash::vk;
 use ash::vk::PhysicalDevice;
+use ash::vk::TaggedStructure as _;
 use ash::{Device, Instance};
 use bitflags::bitflags;
 use std::marker::PhantomData;
@@ -407,7 +408,7 @@ pub struct AllocatorCreateInfo<'a> {
 
     /// Custom CPU memory allocation callbacks. Optional.
     /// When specified, will also be used for all CPU-side memory allocations.
-    pub allocation_callbacks: Option<&'a vk::AllocationCallbacks<'a>>,
+    pub allocation_callbacks: Option<&'a vk::AllocationCallbacks>,
 
     /// Informative callbacks for [`vk::AllocateMemory`], [`vk::FreeMemory`]. Optional.
     pub device_memory_callbacks: Option<&'a ffi::VmaDeviceMemoryCallbacks>,
@@ -512,12 +513,19 @@ pub struct PoolCreateInfo<'a> {
     pub _marker: PhantomData<&'a mut ()>,
 }
 impl<'a> PoolCreateInfo<'a> {
-    pub fn push_next<T: vk::ExtendsMemoryAllocateInfo>(&mut self, next: &'a mut T) {
+    pub fn push_next<T: vk::Extends<vk::MemoryAllocateInfo<'a>> + vk::TaggedStructure<'a>>(
+        &mut self,
+        next: &'a mut T,
+    ) {
         let info = vk::MemoryAllocateInfo {
             p_next: self.memory_allocate_next,
             ..Default::default()
         };
-        let info = info.push_next(next);
+        // NB: `push_next` used to silently overwrite `next`'s own p_next chain.
+        // The new safe `push()` panics instead if `next` already has one - if that
+        // matters for your usage, switch to `unsafe { info.extend(next) }` instead,
+        // which preserves it.
+        let info = info.push(next);
         self.memory_allocate_next = info.p_next;
     }
 }
@@ -800,7 +808,7 @@ pub struct VirtualBlockCreateInfo<'a> {
     pub flags: VirtualBlockCreateFlags,
     /// Custom CPU memory allocation callbacks. Optional.
     /// When specified, they will be used for all CPU-side memory allocations.
-    pub allocation_callbacks: Option<&'a vk::AllocationCallbacks<'a>>,
+    pub allocation_callbacks: Option<&'a vk::AllocationCallbacks>,
 }
 
 /// Parameters of `VirtualAllocation` objects, that can be retrieved using `VirtualBlock::get_allocation_info`.

@@ -11,8 +11,8 @@ pub use ffi::{VmaDetailedStatistics, VmaStatistics};
 pub use pool::*;
 pub use virtual_block::*;
 
-use ash::prelude::VkResult;
 use ash::vk;
+use ash::VkResult;
 use std::mem;
 
 pub type RawAllocatorHandle = ffi::VmaAllocator;

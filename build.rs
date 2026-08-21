@@ -145,11 +145,7 @@ impl bindgen::callbacks::ParseCallbacks for FixAshTypes {
         if original_item_name.starts_with("Vk") {
             // Strip `Vk` prefix, will use `ash::vk::*` instead
             let trimmed_name = original_item_name.trim_start_matches("Vk");
-            if ["AllocationCallbacks"].contains(&trimmed_name) {
-                Some(format!("{}<'static>", trimmed_name))
-            } else {
-                Some(trimmed_name.to_string())
-            }
+            Some(trimmed_name.to_string())
         } else if original_item_name.starts_with("PFN_vk") && original_item_name.ends_with("KHR") {
             // VMA uses a few extensions like `PFN_vkGetBufferMemoryRequirements2KHR`,
             // ash keeps these as `PFN_vkGetBufferMemoryRequirements2`
