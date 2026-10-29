@@ -222,6 +222,12 @@ bitflags! {
         /// You may set this flag only if you found available and enabled this device extension,
         /// while creating Vulkan device passed as VmaAllocatorCreateInfo::device.
         const KHR_MAINTENANCE5 = ffi::VmaAllocatorCreateFlagBits::VMA_ALLOCATOR_CREATE_KHR_MAINTENANCE5_BIT as u32;
+        ///
+        /// Enables usage of VK_KHR_extended_flags extension in the library.
+        ///
+        /// You may set this flag only if you found available and enabled this device extension,
+        /// while creating Vulkan device passed as VmaAllocatorCreateInfo::device.
+        const KHR_EXTENDED_FLAGS = ffi::VmaAllocatorCreateFlagBits::VMA_ALLOCATOR_CREATE_KHR_EXTENDED_FLAGS_BIT as u32;
     }
 }
 
